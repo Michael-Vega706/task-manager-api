@@ -8,10 +8,22 @@ router.post('/', (req, res) => {
 
     const newPerson = req.body;
 
+    if (!newPerson.firstName || newPerson.firstName === '' || typeof newPerson.firstName !== 'string') {
+        return res.status(400).json({
+            'error': 'Invalid field firstName'
+        });
+    }
+
+    if (!newPerson.lastName || newPerson.lastName === '' || typeof newPerson.firstName !== 'string') {
+        return res.status(400).json({
+            'error': 'Invalid field lastName'
+        });
+    }
+    
     fs.readFile('people.json', 'utf-8', (err, data) => {
         if (err) {
             console.error(err);
-            res.status(500).json({ 'error': 'Error reading JSON file.' });
+            return res.status(500).json({ 'error': 'Error reading JSON file.' });
         } else {
             const jsonData = JSON.parse(data);
             newPerson.id = jsonData.length + 1;
@@ -23,7 +35,7 @@ router.post('/', (req, res) => {
                     res.status(500).json({ 'error': 'Error writting JSON file.' });
                 }
 
-                res.status(201).json(newPerson);
+                return res.status(201).json(newPerson);
             })
         }
     });
