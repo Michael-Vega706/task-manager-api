@@ -4,6 +4,7 @@ const router = express.Router();
 const person = require('./person');
 
 router.use('/person', person);
+router.use('/employee', require('./employee'))
 
 router.get('/', (req, res) => {
     res.send('Hello world!');
