@@ -1,24 +1,37 @@
 const express = require('express');
+
+// const Auth = require('./auth');
 const TaskManager = require('./taskManager');
 
+// const auth = new Auth();
+const validateAuthorization = require('../functions/validateAuthorization');
 const taskManager = new TaskManager();
-
 class Server {
 
     constructor() {
         this.app = express();
         this.port = process.env.PORT;
 
+        this.middlewares();
         this.routes();
     }
 
-    routes() {
+    middlewares() {
         this.app.use(express.json())
+    }
+
+    routes() {
         this.app.get('/', (req, res) => {
             res.send('API Krensi - To task management.')
         });
 
-        this.app.post('/task', (req, res) => {
+        this.app.post('/login', (req, res) => {
+            return res.status(200).json({
+                'message': 'Login success.'
+            });
+        });
+
+        this.app.post('/task', validateAuthorization, (req, res) => {
 
             if (req.body == undefined) {
                 return res.status(400).json({
@@ -43,17 +56,17 @@ class Server {
             return res.status(200).json(taskManager.createTask(title, dateTask));
         });
 
-        this.app.get('/task', (req, res) => {
+        this.app.get('/task', validateAuthorization, (req, res) => {
             return res.status(200).json(taskManager.getAllTasks());
         });
 
-        this.app.get('/task/:id', (req, res) => {
+        this.app.get('/task/:id', validateAuthorization, (req, res) => {
             const { id } = req.params;
 
             return res.status(200).json(taskManager.getTaskById(Number(id)));
         })
 
-        this.app.put('/task/:id', (req, res) => {
+        this.app.put('/task/:id', validateAuthorization, (req, res) => {
             const { id } = req.params;
 
             if (req.body == undefined) {
@@ -85,7 +98,7 @@ class Server {
             return res.status(200).json(taskManager.updateTaskById(Number(id), {title, date: dateTask, isComplete}))
         });
 
-        this.app.delete('/task/:id', (req, res) => {
+        this.app.delete('/task/:id', validateAuthorization, (req, res) => {
             const { id } = req.params;
             return res.status(200).json(taskManager.deleteById(Number(id)));
         });
